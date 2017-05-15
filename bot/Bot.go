@@ -9,10 +9,6 @@ import (
 	"strings"
 )
 
-func init() {
-	fmt.Println("Hello from bot!")
-}
-
 type Plugin struct {
 	isRegex       bool
 	matchStr      string
@@ -45,15 +41,6 @@ func NewBot(connectionString string, teamName string) (*Bot, error) {
 	if err != nil {
 		return nil, err
 	}
-	scheme := serverUrl.Scheme
-	username := serverUrl.User.Username()
-	password, hasPass := serverUrl.User.Password()
-	host := serverUrl.Host
-	opaque := serverUrl.Opaque
-	fragment := serverUrl.Fragment
-	path := serverUrl.Path
-	port := serverUrl.Port()
-	fmt.Printf("Scheme: %s\nusername: %s\nhasPass: %t\nPassword: %s\nHost: %s\nOpaque: %s\nfragment: %s\npath: %s\nport: %s\n", scheme, username, hasPass, password, host, opaque, fragment, path, port)
 	bot := new(Bot)
 	bot.serverUrl = fmt.Sprintf("%s://%s%s", serverUrl.Scheme, serverUrl.Host, serverUrl.Path)
 	bot.websocketUrl = fmt.Sprintf("ws://%s%s", serverUrl.Host, serverUrl.Path)
@@ -167,7 +154,6 @@ func (bot *Bot) Start() error {
 	return nil
 }
 func (bot *Bot) handleEvent(event *model.WebSocketEvent) {
-	fmt.Printf("handleEvent(%+v)\n", *event)
 	if event == nil {
 		return
 	}
@@ -179,7 +165,6 @@ func (bot *Bot) handleEvent(event *model.WebSocketEvent) {
 }
 func (bot *Bot) handleNewPost(post *model.Post) {
 	if post.UserId != bot.user.Id {
-		fmt.Printf("handleNewPost(%+v)\n", *post)
 		if bot.plugins != nil {
 			for _, plug := range bot.plugins {
 				if plug.isRegex {

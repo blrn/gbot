@@ -12,16 +12,13 @@ import (
 const github_url_regex = `(?:(?:https?:\/\/)?github\.com\/)(.+?)\/(.+?)(?:/|\s|$)`
 
 func init() {
-	println("Hello, From githubDescription!")
 	bot.Register("githubDescription", func(gbot *bot.Bot) {
-		fmt.Println("in githubDescription ready func")
 		gbot.MatchRegex(onMessage, github_url_regex)
 	})
 
 }
 
 func onMessage(incommingMessage *model.Post, gbot *bot.Bot) {
-	fmt.Println("githubDescription onMessage")
 	_, repositories := IsGithubRepo(incommingMessage.Message)
 	for _, repo := range repositories {
 		msg := createMessage(*repo)
@@ -62,7 +59,6 @@ func IsGithubRepo(url string) (bool, []*github.Repository) {
 		compiled_regex = regexp.MustCompile(github_url_regex)
 	}
 	res := compiled_regex.FindAllStringSubmatch(url, -1)
-	fmt.Printf("res: %q\n", res)
 	if res == nil || len(res) == 0 {
 		return false, nil
 	} else {
