@@ -13,8 +13,7 @@ const github_url_regex = `(?:(?:https?:\/\/)?github\.com\/)(.+?)\/(.+?)(?:/|\s|$
 
 func init() {
 	bot.Register("githubDescription", func(gbot *bot.Bot) {
-		gbot.MatchRegex(onMessage, github_url_regex)
-	})
+		gbot.MatchRegex(onMessage, github_url_regex) })
 
 }
 
@@ -45,7 +44,7 @@ func createMessage(repo github.Repository) string {
 		**Last commit maybe**
 		_Description_
 	*/
-	nameLine := fmt.Sprintf("## [%s](%s)\n", repo.GetFullName(), repo.GetURL())
+	nameLine := fmt.Sprintf("## [%s](%s)\n", repo.GetFullName(), repo.GetHTMLURL())
 	descriptionLine := fmt.Sprintf("_%s_\n\n", repo.GetDescription())
 	statLine := fmt.Sprintf("Stars: %d | Forks: %d | Open Issues: %d\n\n", repo.GetStargazersCount(), repo.GetForksCount(), repo.GetOpenIssuesCount())
 	return nameLine + descriptionLine + statLine
