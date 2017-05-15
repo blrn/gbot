@@ -3,7 +3,7 @@ package plugins
 import (
 	"context"
 	"fmt"
-	"github.com/Chef1991/gbot/bot"
+	"github.com/blrn/gbot/bot"
 	"github.com/google/go-github/github"
 	"github.com/mattermost/platform/model"
 	"regexp"
@@ -45,13 +45,10 @@ func createMessage(repo github.Repository) string {
 		**Last commit maybe**
 		_Description_
 	*/
-	other := repo.GetHTMLURL() + "\n\n"
-	other += repo.GetHomepage() + "\n\n"
-	other += repo.GetUpdatedAt().String() + "\n\n"
 	nameLine := fmt.Sprintf("## [%s](%s)\n", repo.GetFullName(), repo.GetURL())
 	descriptionLine := fmt.Sprintf("_%s_\n\n", repo.GetDescription())
 	statLine := fmt.Sprintf("Stars: %d | Forks: %d | Open Issues: %d\n\n", repo.GetStargazersCount(), repo.GetForksCount(), repo.GetOpenIssuesCount())
-	return nameLine + descriptionLine + statLine + other
+	return nameLine + descriptionLine + statLine
 }
 
 func IsGithubRepo(url string) (bool, []*github.Repository) {
