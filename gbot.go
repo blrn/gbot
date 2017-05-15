@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Chef1991/gbot/bot"
-	_ "github.com/Chef1991/gbot/plugins"
+	"github.com/blrn/gbot/bot"
+	_ "github.com/blrn/gbot/plugins"
 	"os"
 )
 
@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error while creating bot")
 		fmt.Println(err)
+                fmt.Printf("%+v\n", err)
 		panic(err)
 	}
 	gbot.Start()
