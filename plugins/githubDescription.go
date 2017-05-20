@@ -13,8 +13,29 @@ const github_url_regex = `(?:(?:https?:\/\/)?github\.com\/)(.+?)\/(.+?)(?:/|\s|$
 
 func init() {
 	bot.Register("githubDescription", func(gbot *bot.Bot) {
-		gbot.MatchRegex(onMessage, github_url_regex) })
+		//gbot.MatchRegex(onMessage, github_url_regex)
+		gbot.SlashCommand(bot.SlashCommandConfig{Command: "/github"}, onSlashCommand)
+	})
 
+}
+
+func onSlashCommand(gBot *bot.Bot, req bot.SlashCommandRequest) *bot.SlashCommandResponse {
+	if len(req.Text) == 0 {
+		return nil
+	}
+	_, repositories := IsGithubRepo(req.Text)
+	resp := bot.NewSlashCommandResponse(req)
+	for i, repo := range repositories {
+		msg := createMessage(*repo)
+		if i != 0 {
+			resp.Text += "\n\n\n\n"
+		}
+		resp.Text += msg
+	}
+	if len(resp.Text) == 0 {
+		return nil
+	}
+	return resp
 }
 
 func onMessage(incommingMessage *model.Post, gbot *bot.Bot) {
