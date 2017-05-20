@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mattermost/platform/model"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -28,6 +29,8 @@ type Bot struct {
 	team             *model.Team
 	plugins          []Plugin
 	stopChan         chan bool
+	Router           HttpRouter
+	config           Config
 }
 
 // Create a new Bot Object
@@ -42,6 +45,7 @@ func NewBot(connectionString string, teamName string) (*Bot, error) {
 		return nil, err
 	}
 	bot := new(Bot)
+	bot.config = defaultConfig()
 	bot.serverUrl = fmt.Sprintf("%s://%s%s", serverUrl.Scheme, serverUrl.Host, serverUrl.Path)
 	bot.websocketUrl = fmt.Sprintf("ws://%s%s", serverUrl.Host, serverUrl.Path)
 	bot.userInfo = serverUrl.User
@@ -59,11 +63,23 @@ func NewBot(connectionString string, teamName string) (*Bot, error) {
 	if err = bot.SetTeam(teamName); err != nil {
 		return bot, err
 	}
+	if err = bot.SetDefaultChannel(); err != nil {
+		return bot, err
+	}
 	if err = bot.createWsClient(); err != nil {
 		return bot, err
 	}
+	bot.Router = HttpRouter{gBot: bot}
 	registerPlugins(bot)
 	return bot, nil
+}
+func (bot *Bot) SetDefaultChannel() error {
+	if chanResult, err := bot.client.GetChannelByName(bot.config.DefaultChannelName); err != nil {
+		return err
+	} else {
+		bot.defaultChannelId = chanResult.Data.(*model.Channel).Id
+		return nil
+	}
 }
 func (bot *Bot) SetTeam(teamName string) error {
 	for _, team := range bot.initialLoad.Teams {
@@ -125,6 +141,9 @@ func (bot *Bot) MatchRegex(callback func(*model.Post, *Bot), matchRegex ...strin
 		bot.plugins = append(bot.plugins, plug)
 	}
 }
+func (bot *Bot) SlashCommand(cmdConfig SlashCommandConfig, handler SlashCommandHandler) {
+	bot.Router.addSlashCommand(cmdConfig, handler)
+}
 
 func (bot *Bot) SendMessage(post *model.Post) error {
 	if _, err := bot.client.CreatePost(post); err != nil {
@@ -133,8 +152,13 @@ func (bot *Bot) SendMessage(post *model.Post) error {
 		return nil
 	}
 }
-
+func (bot *Bot) startHttpServer() {
+	http.ListenAndServe(bot.config.getHttpAddress(), bot.Router)
+}
 func (bot *Bot) Start() error {
+	if bot.config.HttpEnabled {
+		go bot.startHttpServer()
+	}
 	if bot.webSocketClient == nil {
 		if err := bot.createWsClient(); err != nil {
 			return err
@@ -176,4 +200,9 @@ func (bot *Bot) handleNewPost(post *model.Post) {
 			}
 		}
 	}
+}
+func (bot *Bot) NewPost() *model.Post {
+	p := new(model.Post)
+	p.ChannelId = bot.defaultChannelId
+	return p
 }
