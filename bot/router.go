@@ -82,6 +82,7 @@ func (router HttpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if respMarshalled, err := json.Marshal(resp); err != nil {
 						fmt.Println("ERROR marshalling response", err)
 					} else {
+						w.Header().Add("Content-Type", "application/json")
 						w.Write(respMarshalled)
 					}
 				}
