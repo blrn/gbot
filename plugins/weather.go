@@ -5,8 +5,6 @@ import (
 	"github.com/blrn/gbot/bot"
 	"github.com/jessfraz/weather/geocode"
 	"github.com/jessfraz/weather/forecast"
-	"os/exec"
-	"io/ioutil"
 	"math"
 )
 
@@ -16,16 +14,13 @@ const (
 )
 
 func init() {
-	fmt.Println("Weather init")
 	bot.Register("weather", func(gbot *bot.Bot) {
-		fmt.Println("weather Register")
 		gbot.SlashCommand(bot.SlashCommandConfig{Command: "/weather"}, weatherOnSlashCommand)
 	})
 }
 
 func weatherOnSlashCommand(gBot *bot.Bot, req bot.SlashCommandRequest) *bot.SlashCommandResponse {
 	fmt.Println("weatherOnSlashCommand")
-	fmt.Printf("req.Text: %s\n", req.Text)
 	location := default_location
 	if len(req.Text) != 0 {
 		location = req.Text
@@ -37,29 +32,7 @@ func weatherOnSlashCommand(gBot *bot.Bot, req bot.SlashCommandRequest) *bot.Slas
 	} else {
 		resp.Text = weatherText
 	}
-	if (false) {
-		cmd := exec.Command("weather", "-l", location)
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			fmt.Printf("Error getting stdout pipe: %+v\n", err)
-			return nil
-		}
-		defer stdout.Close()
-		if err = cmd.Start(); err != nil {
-			fmt.Printf("Error starting command: %+v\n", err)
-			return nil
-		}
-		if stdoutBytes, err := ioutil.ReadAll(stdout); err != nil {
-			fmt.Printf("Error reading from stdout: %+v\n", err)
-			return nil
-		} else {
-			if err := cmd.Wait(); err != nil {
-				fmt.Printf("Error waiting for command: %+v\n", err)
-				return nil
-			}
-			resp.Text = string(stdoutBytes)
-		}
-	}
+	resp.UserName = "Weather"
 	return resp
 
 }
