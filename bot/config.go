@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	DEFAULT_SERVER_PORT  uint = 8000
-	DEFAULT_SERVER_IP         = "127.0.0.1"
+	DEFAULT_SERVER_IP         = "0.0.0.0"
 	DEFAULT_CHANNEL_NAME      = "town-square"
 )
 
